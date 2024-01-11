@@ -17,42 +17,42 @@ namespace WebApplicationAsyncDemo.Controllers
         }
 
         [HttpGet]
-        public IActionResult Get()
+        public IResult Get()
         {
             var postgresDemos = _postgresDemos.PostgresDemos;
-            return Ok(postgresDemos);
+            return Results.Ok(postgresDemos);
         }
 
         // GET api/<PostgresDemosController>/5
         [AllowAnonymous]
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id)
+        public async Task<IResult> Get(int id)
         {
             var demo = await _postgresDemos.PostgresDemos.FindAsync(id);
-            return Ok(demo);
+            return Results.Ok(demo);
         }
         
         // POST api/<PostgresDemosController>
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] PostgresDemo model)
+        public async Task<IResult> Post([FromBody] PostgresDemo model)
         {
         
             var demoExist = await _postgresDemos.PostgresDemos.AnyAsync(e => e.Name == model.Name);
             if (demoExist == true)
             {
-                return Ok(new { Message = "Demo Already Created" });
+                return Results.Ok(new { Message = "Demo Already Created" });
         
             }
         
             _postgresDemos.Add(model);
             _postgresDemos.SaveChanges();
         
-            return Ok(new { Message = "Demo Created" });
+            return Results.Ok(new { Message = "Demo Created" });
         }
         
         // PUT api/<PostgresDemosController>/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put([FromBody] PostgresDemo model)
+        public async Task<IResult> Put([FromBody] PostgresDemo model)
         {
         
             _postgresDemos.PostgresDemos.Attach(model);
@@ -62,19 +62,19 @@ namespace WebApplicationAsyncDemo.Controllers
             // _postgresDemos.PostgresDemos.Update(model);
             await _postgresDemos.SaveChangesAsync();
         
-            return Ok(new { Message = "Demo Updated" });
+            return Results.Ok(new { Message = "Demo Updated" });
         }
         
         // DELETE api/<PostgresDemosController>/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IResult> Delete(int id)
         {
             var demo = _postgresDemos.PostgresDemos.Find(id);
 
             _postgresDemos.PostgresDemos.Remove(demo);
             await _postgresDemos.SaveChangesAsync();
         
-            return Ok(new { Message = "Demo Deleted" });
+            return Results.Ok(new { Message = "Demo Deleted" });
         
         }
     }
