@@ -8,7 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 // Add Postgres example at https://labpys.com/how-to-create-web-api-crud-in-asp-net-core-with-postgresql/
-builder.Services.AddDbContext<PostgresDemoDbContext>(option => option.UseNpgsql(builder.Configuration.GetConnectionString("connection")));
+builder.Services.AddDbContext<PostgresDemoDbContext>(option => 
+    option.UseNpgsql(builder.Configuration.GetConnectionString("connection")));
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

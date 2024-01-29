@@ -9,18 +9,25 @@ namespace WebApplicationAsyncDemo.Controllers
     [Route("[controller]")]
     public class PostgresDemoController : ControllerBase
     {
-        private PostgresDemoDbContext _postgresDemos;
+        private PostgresDemoHelper _postgresDemoHelper;
 
         public PostgresDemoController(PostgresDemoDbContext postgresDemos)
         {
-            _postgresDemos = postgresDemos;
+            _postgresDemoHelper = new PostgresDemoHelper(postgresDemos);
         }
 
         [HttpGet]
-        public IResult Get()
+        public async Task<IResult> Get()
         {
-            var postgresDemos = _postgresDemos.PostgresDemos;
-            return Results.Ok(postgresDemos);
+            try
+            {
+                var postgresDemos = await _postgresDemoHelper.GetAllPostgresDemos();
+                return Results.Ok(postgresDemos);
+            }
+            catch (Exception ex)
+            {
+                return Results.BadRequest(ex.Message);
+            }
         }
 
         // GET api/<PostgresDemosController>/5
@@ -28,54 +35,69 @@ namespace WebApplicationAsyncDemo.Controllers
         [HttpGet("{id}")]
         public async Task<IResult> Get(int id)
         {
-            var demo = await _postgresDemos.PostgresDemos.FindAsync(id);
-            return Results.Ok(demo);
+            try
+            {
+                var demo = await _postgresDemoHelper.GetPostgresDemosById(id);
+
+                if (demo == null)
+                {
+                    return Results.BadRequest("Demo Id not found");
+                }
+
+                return Results.Ok(demo);
+            }
+            catch (Exception ex)
+            {
+                return Results.BadRequest(ex.Message);
+            }
         }
         
         // POST api/<PostgresDemosController>
         [HttpPost]
         public async Task<IResult> Post([FromBody] PostgresDemo model)
         {
-        
-            var demoExist = await _postgresDemos.PostgresDemos.AnyAsync(e => e.Name == model.Name);
-            if (demoExist == true)
+            try
             {
-                return Results.Ok(new { Message = "Demo Already Created" });
-        
+                var isDemoCreated = await _postgresDemoHelper.InsertPostgresDemo(model);
+                var message = isDemoCreated ? "Demo Created" : "Demo Already Created";
+                return Results.Ok(new { Message = message });
             }
-        
-            _postgresDemos.Add(model);
-            _postgresDemos.SaveChanges();
-        
-            return Results.Ok(new { Message = "Demo Created" });
+            catch (Exception ex)
+            {
+                return Results.BadRequest(ex.Message);
+            }
         }
         
         // PUT api/<PostgresDemosController>/5
-        [HttpPut("{id}")]
+        [HttpPut]
         public async Task<IResult> Put([FromBody] PostgresDemo model)
         {
-        
-            _postgresDemos.PostgresDemos.Attach(model);
-            _postgresDemos.Entry(model).State = EntityState.Modified;
-        
-        
-            // _postgresDemos.PostgresDemos.Update(model);
-            await _postgresDemos.SaveChangesAsync();
-        
-            return Results.Ok(new { Message = "Demo Updated" });
+            try
+            {
+                var isDemoUpdated = await _postgresDemoHelper.UpdatePostgresDemo(model);
+                var message = isDemoUpdated ? "Demo Updated" : "Demo not found";
+                return Results.Ok(new { Message = message });
+            }
+            catch (Exception ex)
+            {
+                return Results.BadRequest(ex.Message);
+            }
         }
         
         // DELETE api/<PostgresDemosController>/5
         [HttpDelete("{id}")]
         public async Task<IResult> Delete(int id)
         {
-            var demo = _postgresDemos.PostgresDemos.Find(id);
-
-            _postgresDemos.PostgresDemos.Remove(demo);
-            await _postgresDemos.SaveChangesAsync();
-        
-            return Results.Ok(new { Message = "Demo Deleted" });
-        
+            try
+            {
+                var isDemoDeleted = await _postgresDemoHelper.DeletePostgresDemo(id);
+                var message = isDemoDeleted ? "Demo Deleted" : "Demo not exists";
+                return Results.Ok(new { Message =  message});
+            }
+            catch (Exception ex)
+            {
+                return Results.BadRequest(ex.Message);
+            }
         }
     }
 }
